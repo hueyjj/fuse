@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hueyjj/fuse/pkg/sundermodule"
 	// "os"
-	"bytes"
+	//"bytes"
 	"log"
 )
 
@@ -28,6 +27,8 @@ func buildShellOptions() map[string]sundermodule.ShellOption {
 }
 
 func main() {
+	shellOpts := buildShellOptions()
+
 	//var im sundermodule.IncomingMessage
 	//if im, err := sundermodule.CheckCmdArgs(); err != nil {
 	//	fmt.Fprintf(os.Stderr, "%+v\n%s\n", im, err)
@@ -36,44 +37,12 @@ func main() {
 
 	// Validate incoming
 
-	shellOpts := buildShellOptions()
+	opt := shellOpts["yt_download_video"]
+	opt.AddCommand("https://www.youtube.com/watch?v=64DtWBXjU2Y")
+	opt.SetArgValue("format", "m4a")
 
-	cmdOpt := shellOpts["yt_download_video"]
-	cmdOpt.AddCommand("https://www.youtube.com/watch?v=64DtWBXjU2Y")
-	cmdOpt.SetArgValue("format", "m4a")
-
-	cmd := cmdOpt.BuildCmd()
-	cmd.Dir = "C:\\Users\\JJ\\Downloads"
-	fmt.Printf("%+v\n", cmd)
-
-	var outbuf, errbuf bytes.Buffer
-
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-
-	if err := cmd.Start(); err != nil {
-		log.Printf("Failed to start cmd: %v", err)
-		panic(err)
+	err := sundermodule.RunCommand(opt, "C:\\Users\\JJ\\Downloads")
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	stdout := outbuf.String()
-	stderr := errbuf.String()
-
-	log.Println(stdout)
-	log.Println(stderr)
-
-	log.Println("DOing other stuff...")
-
-	if err := cmd.Wait(); err != nil {
-		stdout := outbuf.String()
-		stderr := errbuf.String()
-
-		log.Println(stdout)
-		log.Println(stderr)
-		log.Printf("Cmd returned error: %v", err)
-		//panic(err)
-	}
-	log.Printf("Finished running")
-
-	//sundermodule.Execute(?)
 }

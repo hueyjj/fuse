@@ -3,7 +3,10 @@ package sundermodule
 import (
 	"os/exec"
 	//"strings"
-	"fmt"
+	//"fmt"
+	"bufio"
+	"io"
+	"log"
 )
 
 type ShellOption struct {
@@ -105,4 +108,44 @@ func (so *ShellOption) BuildCmd() *exec.Cmd {
 		args...,
 	)
 	return cmd
+}
+
+// RunCommand runs a command
+func RunCommand(opt ShellOption, dir string) error {
+	cmd := opt.BuildCmd()
+	cmd.Dir = dir
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		panic(err)
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		panic(err)
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Starting command: %s", opt.Name)
+
+	go LogOutput(stdout)
+	go LogOutput(stderr)
+
+	if err = cmd.Wait(); err != nil {
+		log.Printf("%s returned error: %v", opt.Name, err)
+		// TODO Customize the error here, do not end the program here
+	}
+
+	return err
+}
+
+// LogOutput logs a reader (stdout, stderr)
+func LogOutput(r io.Reader) {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		log.Println(scanner.Text())
+	}
 }
