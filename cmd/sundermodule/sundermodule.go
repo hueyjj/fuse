@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func buildShellOptions() map[string]sm.CliCmd {
+func buildCliCmds() map[string]sm.CliCmd {
 	return map[string]sm.CliCmd{
 		"yt_download_music": sm.CliCmd{
 			CommandName: "yt_download_music",
@@ -28,7 +28,7 @@ func buildShellOptions() map[string]sm.CliCmd {
 }
 
 func main() {
-	shellOpts := buildShellOptions()
+	shellOpts := buildCliCmds()
 
 	im, err := sm.CheckIncMsg(shellOpts)
 	if err != nil {
