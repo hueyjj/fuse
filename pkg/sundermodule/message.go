@@ -51,7 +51,7 @@ func commandExists(str string, cliCmds map[string]CliCmd) (IncomingMessage, bool
 	if _, ok := cliCmds[im.AppName]; ok {
 		// Check if the data matches
 
-		log.Printf("command exists")
+		//log.Printf("command exists")
 	}
 
 	return im, isValid

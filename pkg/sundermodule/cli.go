@@ -27,15 +27,21 @@ type Option struct {
 type FlagAlias string
 type Flag string
 
+func removeEmptyStrings(a []string) []string {
+	b := a[:0]
+	for _, x := range a {
+		if x != "" {
+			b = append(b, x)
+		}
+	}
+	return b
+}
+
 func (so *CliCmd) buildOpts() []string {
 	var opts []string
 	for _, opt := range so.Options {
-		if opt.Flag != "" {
-			opts = append(opts, opt.Flag)
-		}
-		if opt.Value != "" {
-			opts = append(opts, opt.Value)
-		}
+		opts = append(opts, opt.Flag)
+		opts = append(opts, opt.Value)
 	}
 
 	return opts
@@ -43,7 +49,17 @@ func (so *CliCmd) buildOpts() []string {
 
 // BuildCmd builds the command to be executed by exec
 func (so *CliCmd) BuildCmd() *exec.Cmd {
-	args := append(so.Args, so.buildOpts()...)
+	args := []string{so.Command}
+	args = append(args, so.Args...)
+	args = append(args, so.buildOpts()...)
+
+	args = removeEmptyStrings(args)
+
+	//log.Println(so.AppName)
+	//log.Println(len(so.buildOpts()))
+	//log.Println(so.buildOpts())
+	log.Printf("Command built with %d args:", len(args))
+	log.Printf("> %s %v ", so.AppName, args)
 	cmd := exec.Command(
 		so.AppName,
 		args...,
@@ -53,6 +69,7 @@ func (so *CliCmd) BuildCmd() *exec.Cmd {
 
 // RunCommand runs a command
 func RunCommand(cliCmd CliCmd, dir string) error {
+	log.Printf("%v+\n", cliCmd)
 	cmd := cliCmd.BuildCmd()
 	cmd.Dir = dir
 

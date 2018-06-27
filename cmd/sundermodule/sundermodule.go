@@ -22,28 +22,29 @@ func buildCliCmds() map[string]sm.CliCmd {
 				"format": sm.Option{
 					Flag: "--format", Value: "m4a",
 				},
+				"ignore_errors": sm.Option{
+					Flag: "-i",
+				},
 			},
 		},
 	}
 }
 
 func main() {
-	shellOpts := buildCliCmds()
+	cliCmds := buildCliCmds()
 
-	im, err := sm.CheckIncMsg(shellOpts)
+	im, err := sm.CheckIncMsg(cliCmds)
 	if err != nil {
 		log.Printf("%+v\n", im)
 		log.Fatal(err)
 		os.Exit(1)
 	}
-	log.Printf("%+v\n", im)
 
-	//opt := shellOpts["yt_download_video"]
-	//opt.AddCommand("https://www.youtube.com/watch?v=64DtWBXjU2Y")
-	//opt.SetArgValue("format", "m4a")
+	cliCmd := cliCmds["yt_download_music"]
+	cliCmd.Args = append(cliCmd.Args, "https://www.youtube.com/watch?v=64DtWBXjU2Y")
 
-	//err := sm.RunCommand(opt, "C:\\Users\\JJ\\Downloads")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	err = sm.RunCommand(cliCmd, `C:\Users\JJ\Downloads`)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
