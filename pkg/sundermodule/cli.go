@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"io"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -55,9 +56,6 @@ func (so *CliCmd) BuildCmd() *exec.Cmd {
 
 	args = removeEmptyStrings(args)
 
-	//log.Println(so.AppName)
-	//log.Println(len(so.buildOpts()))
-	//log.Println(so.buildOpts())
 	log.Printf("Command built with %d args:", len(args))
 	log.Printf("> %s %v ", so.AppName, args)
 	cmd := exec.Command(
@@ -69,7 +67,6 @@ func (so *CliCmd) BuildCmd() *exec.Cmd {
 
 // RunCommand runs a command
 func RunCommand(cliCmd CliCmd, dir string) error {
-	log.Printf("%v+\n", cliCmd)
 	cmd := cliCmd.BuildCmd()
 	cmd.Dir = dir
 
@@ -88,10 +85,11 @@ func RunCommand(cliCmd CliCmd, dir string) error {
 	}
 
 	args := append(cliCmd.Args, cliCmd.buildOpts()...)
-	log.Printf("Starting command: %s\n%s %s\n", cliCmd.CommandName, cliCmd.AppName, strings.Join(args, " "))
+	log.Printf("%s running...\n", cliCmd.CommandName)
+	log.Printf("%s %s\n", cliCmd.AppName, strings.Join(args, " "))
 
-	go LogOutput(stdout)
-	go LogOutput(stderr)
+	go logOutput(stdout)
+	go logOutput(stderr)
 
 	if err = cmd.Wait(); err != nil {
 		log.Printf("%s returned error: %v", cliCmd.CommandName, err)
@@ -101,10 +99,12 @@ func RunCommand(cliCmd CliCmd, dir string) error {
 	return err
 }
 
-// LogOutput logs a reader (stdout, stderr)
-func LogOutput(r io.Reader) {
+// logOutput logs a reader (stdout, stderr)
+func logOutput(r io.Reader) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		log.Println(scanner.Text())
+		// Write to Stdout even if io.Reader connects to stdout/stderr pipe
+		os.Stdout.Write([]byte(scanner.Text()))
+		os.Stdout.Write([]byte("\n"))
 	}
 }

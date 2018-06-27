@@ -20,15 +20,17 @@ func CheckIncMsg(cliCmds map[string]CliCmd) (IncomingMessage, error) {
 	var im IncomingMessage
 	if len(os.Args) == 2 {
 		msg = os.Args[1]
-		log.Printf("%v+\n", msg)
 
 		if msg == "get" {
+			log.Printf("%s\n", "get command received")
 			printAPI(cliCmds)
 			os.Exit(0)
 		} else if msg == "prettyget" {
+			log.Printf("%s\n", "prettyget command received")
 			prettyPrintAPI(cliCmds)
 			os.Exit(0)
 		} else if im, ok := commandExists(msg, cliCmds); ok {
+			//log.Printf("%v+\n", msg)
 			return im, nil
 		}
 	} else if len(os.Args) > 2 {
