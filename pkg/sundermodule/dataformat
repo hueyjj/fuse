@@ -1,0 +1,15 @@
+INPUT_JSON = `{
+    "command_name": "yt_download_music",
+    "options": {
+        "format": {
+            "value": "m4a"
+        },
+        "flag_alias": {
+            "value": "some value"
+        }
+    },
+    "args": [
+        "https://www.youtube.com/watch?v=7dGwk5-QMpc",
+        "more arguments"
+    ]
+}`

@@ -10,9 +10,12 @@ import (
 
 // IncomingMessage represents a command to execute on some data
 type IncomingMessage struct {
-	AppName string          `json:"app_name"`
-	Data    json.RawMessage `json:"data"`
+	CommandName string                   `json:"command_name"`
+	Args        []string                 `json:"args"`
+	Options     map[FlagAlias]UserOption `json:"options"`
 }
+
+type UserOption map[string]string
 
 // CheckIncMsg checks stdin if a JSON object was passed and is valid
 func CheckIncMsg(cliCmds map[string]CliCmd) (IncomingMessage, error) {
@@ -29,7 +32,7 @@ func CheckIncMsg(cliCmds map[string]CliCmd) (IncomingMessage, error) {
 			log.Printf("%s\n", "prettyget command received")
 			prettyPrintAPI(cliCmds)
 			os.Exit(0)
-		} else if im, ok := commandExists(msg, cliCmds); ok {
+		} else if im, ok := parseCommand(msg, cliCmds); ok {
 			//log.Printf("%v+\n", msg)
 			return im, nil
 		}
@@ -40,23 +43,25 @@ func CheckIncMsg(cliCmds map[string]CliCmd) (IncomingMessage, error) {
 	return im, errors.New("CheckIncMsg: required JSON object as a string as input")
 }
 
-// commandExists checks if the string is of type IncomingMessage
-func commandExists(str string, cliCmds map[string]CliCmd) (IncomingMessage, bool) {
+// parseCommand checks if the string is of type IncomingMessage
+func parseCommand(str string, cliCmds map[string]CliCmd) (IncomingMessage, bool) {
 	var im IncomingMessage
-	isValid := json.Unmarshal([]byte(str), &im) == nil
+	if json.Unmarshal([]byte(str), &im) != nil {
+		return im, false
+	}
 
-	if im.AppName == "" || im.Data == nil {
+	if im.CommandName == "" {
 		return im, false
 	}
 
 	// Check if commands exist
-	if _, ok := cliCmds[im.AppName]; ok {
+	if _, ok := cliCmds[im.CommandName]; ok {
 		// Check if the data matches
 
 		//log.Printf("command exists")
 	}
 
-	return im, isValid
+	return im, true
 }
 
 func printAPI(cliCmds map[string]CliCmd) {

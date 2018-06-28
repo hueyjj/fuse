@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
 TEST_DATA='{
-    "app_name": "yt_download_music",
-    "data": {
+    "command_name": "yt_download_music",
+    "options": {
         "format": {
             "value": "m4a"
         }
-    }
+    },
+    "args": [
+        "https://www.youtube.com/watch?v=7dGwk5-QMpc"
+    ]
 }'
 
 echo

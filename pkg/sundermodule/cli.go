@@ -3,8 +3,8 @@ package sundermodule
 import (
 	"os/exec"
 	//"strings"
-	//"fmt"
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -12,12 +12,22 @@ import (
 )
 
 type CliCmd struct {
-	CommandName string
+	// Alias for easier API readability
+	CommandName string /* Client doesn't modify */
 
-	AppName string
-	Command string
-	Args    []string
-	Options map[FlagAlias]Option
+	// Actual application name
+	AppName string /* Client doesn't modify */
+
+	// Application command
+	Command string /* Client doesn't modify */
+
+	// FIXME Command line are order sensitive. Must give args position
+	// when building the full command line.
+	// List of args
+	Args []string /* Client can modify */
+
+	// Flags and values to be passed
+	Options map[FlagAlias]*Option /* Client can modify */
 }
 
 type Option struct {
@@ -107,4 +117,19 @@ func logOutput(r io.Reader) {
 		os.Stdout.Write([]byte(scanner.Text()))
 		os.Stdout.Write([]byte("\n"))
 	}
+}
+
+func getCommand(cliCmds map[string]CliCmd, im IncomingMessage) (CliCmd, error) {
+	if cmd, ok := cliCmds[im.CommandName]; ok {
+		return cmd, nil
+	}
+	return CliCmd{}, fmt.Errorf("Unable to find %s in available command options", im.CommandName)
+}
+
+func FillCommand(cliCmd CliCmd, im IncomingMessage) CliCmd {
+	cliCmd.Args = append(cliCmd.Args, im.Args...)
+	for flagAlias, userOption := range im.Options {
+		cliCmd.Options[flagAlias].Value = userOption["value"]
+	}
+	return cliCmd
 }
