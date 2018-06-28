@@ -37,14 +37,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	//cliCmd := cliCmds["yt_download_music"]
-	//cliCmd.Args = append(cliCmd.Args, "https://www.youtube.com/watch?v=64DtWBXjU2Y")
-
 	cliCmd := sm.FillCommand(cliCmds[im.CommandName], im)
-	log.Printf("%+v\n", cliCmd)
 
 	err = sm.RunCommand(cliCmd, `C:\Users\JJ\Downloads`)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		os.Stdout.WriteString(err.Error())
+		os.Exit(1)
 	}
+	os.Exit(0)
 }
